@@ -542,18 +542,19 @@
         reader.readAsText(file);
     }
 
-    async function cargarDesdeRepo() {
+    async function cargarDesdeRepo(isAuto = false) {
         try {
-            // Se agrega ?v=timestamp para evitar que el navegador use la versión en caché
+            // ?v=... evita que el navegador use la versión antigua en caché
             const response = await fetch('menu_respaldo.json?v=' + new Date().getTime());
             if (!response.ok) throw new Error("No se encontró el archivo.");
             const data = await response.json();
             aplicarData(data);
-            alert("Sincronización con GitHub completada. La página se recargará.");
-            location.reload();
+            if(!isAuto) {
+                alert("Sincronización con GitHub completada. La página se recargará.");
+                location.reload();
+            }
         } catch (err) { 
-            console.log("No se pudo cargar desde GitHub o error de red."); 
-            render(); 
+            if(!isAuto) alert("No se pudo cargar desde GitHub. Verifique la conexión.");
         }
     }
 
@@ -596,12 +597,10 @@
 
     function borrarTodo() { if(confirm("PELIGRO: ¿Estás seguro de borrar TODO el menú?")) { localStorage.clear(); location.reload(); } }
 
-    // LÓGICA DE INICIO: Prioriza localStorage. Solo carga de GitHub si no hay nada guardado.
-    if (localStorage.getItem('conf')) {
-        render();
-    } else {
-        cargarDesdeRepo();
-    }
+    // Renderiza lo local inmediatamente para velocidad
+    render();
+    // E intenta sincronizar siempre en segundo plano (modo silencioso)
+    cargarDesdeRepo(true);
 </script>
 </body>
 </html>
