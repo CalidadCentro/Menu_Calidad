@@ -101,7 +101,7 @@
             .card-body { padding: 10px; text-align: left !important; flex: 1; }
             .category-section { page-break-inside: auto; }
             .map-wrapper { display: block !important; height: 300px !important; visibility: visible !important; }
-            .qr-container { display: block !important; }
+            .qr-container { display: flex !important; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
     </style>
@@ -134,7 +134,9 @@
             <img src="" id="logo-footer" class="footer-logo">
             <p id="footer-dir" style="font-weight: 600; margin: 0 0 8px 0; font-size: 1.1rem;"></p>
             <div id="footer-tels" style="font-size: 1rem; color: #666; text-align: center;"></div>
+            
             <div id="footer-qr-area" class="qr-container"></div>
+            
             <div id="footer-socials" class="social-tag-footer"></div>
         </div>
     </div>
@@ -150,8 +152,11 @@
         <label>Nombre del Negocio:</label><input type="text" id="adm-titulo" oninput="actualizarConfig()">
         <label>Título en Pestaña:</label><input type="text" id="adm-tab-title" oninput="actualizarConfig()">
         <label>Texto Copyright:</label><input type="text" id="adm-copy" oninput="actualizarConfig()">
+        
         <label>URL para Código QR (Carta Digital):</label>
         <input type="text" id="adm-url-qr" placeholder="https://tu-sitio.com" oninput="actualizarConfig()">
+        <label>Imagen QR Personalizado (Opcional):</label>
+        <input type="file" onchange="subirImagenExtra(this, 'qrCustom')">
         
         <label>Tipo de Letra:</label>
         <select id="adm-font" onchange="actualizarConfig()">
@@ -281,6 +286,7 @@
     let logoFooter = localStorage.getItem('logoFooter') || "";
     let favicon = localStorage.getItem('favicon') || "";
     let mapaImg = localStorage.getItem('mapaImg') || "";
+    let qrCustom = localStorage.getItem('qrCustom') || "";
 
     function render() {
         document.documentElement.style.setProperty('--fondo', config.colBg || "#ffffff");
@@ -334,12 +340,32 @@
         }
 
         let qrArea = document.getElementById('footer-qr-area');
+        let qrHTML = "";
+
         if(config.urlQR && config.urlQR.trim() !== "") {
-            qrArea.innerHTML = `
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(config.urlQR)}" class="qr-img">
-                <div class="qr-label"><i class="fas fa-qrcode"></i> Carta en línea</div>
+            qrHTML += `
+                <div style="text-align: center;">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(config.urlQR)}" class="qr-img">
+                    <div class="qr-label"><i class="fas fa-qrcode"></i> Carta en línea</div>
+                </div>
             `;
-            qrArea.style.display = 'block';
+        }
+
+        if(qrCustom) {
+            qrHTML += `
+                <div style="text-align: center;">
+                    <img src="${qrCustom}" class="qr-img">
+                    <div class="qr-label"><i class="fas fa-qrcode"></i> Pagos deuna!</div>
+                </div>
+            `;
+        }
+
+        if(qrHTML !== "") {
+            qrArea.innerHTML = qrHTML;
+            qrArea.style.display = 'flex';
+            qrArea.style.justifyContent = 'center';
+            qrArea.style.gap = '20px';
+            qrArea.style.flexWrap = 'wrap';
         } else {
             qrArea.style.display = 'none';
         }
@@ -486,7 +512,7 @@
     }
 
     function cambiarClave() { let n = document.getElementById('adm-new-pass').value; if(n){config.pass=n; localStorage.setItem('conf', JSON.stringify(config)); alert("OK");} }
-    async function subirImagenExtra(input, tipo) { if(!input.files[0]) return; let b = await comprimirImagen(input.files[0]); localStorage.setItem(tipo, b); if(tipo==='logo') logo=b; location.reload(); }
+    async function subirImagenExtra(input, tipo) { if(!input.files[0]) return; let b = await comprimirImagen(input.files[0]); localStorage.setItem(tipo, b); if(tipo==='logo') logo=b; if(tipo==='qrCustom') qrCustom=b; location.reload(); }
     function agregarRed() { let i=document.getElementById('new-social-type').value, n=document.getElementById('new-social-name').value, u=document.getElementById('new-social-url').value; if(n&&u){redes.push({icon:i,name:n,url:u}); localStorage.setItem('redes',JSON.stringify(redes)); render();} }
     function borrarRed(i) { redes.splice(i, 1); localStorage.setItem('redes', JSON.stringify(redes)); render(); }
     function agregarCat() { let v = document.getElementById('new-cat-input').value.trim(); if(v && !categorias.includes(v)) { categorias.push(v); localStorage.setItem('cats', JSON.stringify(categorias)); render(); } document.getElementById('new-cat-input').value = ''; }
@@ -524,7 +550,7 @@
     }
 
     function exportarJSON() {
-        const data = { cats: categorias, prods: productos, redes: redes, conf: config, logo: logo, logoFooter: logoFooter, favicon: favicon, mapaImg: mapaImg };
+        const data = { cats: categorias, prods: productos, redes: redes, conf: config, logo: logo, logoFooter: logoFooter, favicon: favicon, mapaImg: mapaImg, qrCustom: qrCustom };
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
         const downNode = document.createElement('a');
         downNode.setAttribute("href", dataStr);
@@ -544,7 +570,6 @@
 
     async function cargarDesdeRepo(isAuto = false) {
         try {
-            // ?v=... evita que el navegador use la versión antigua en caché
             const response = await fetch('menu_respaldo.json?v=' + new Date().getTime());
             if (!response.ok) throw new Error("No se encontró el archivo.");
             const data = await response.json();
@@ -568,6 +593,7 @@
             if (data.logoFooter) { logoFooter = data.logoFooter; localStorage.setItem('logoFooter', data.logoFooter); }
             if (data.favicon) { favicon = data.favicon; localStorage.setItem('favicon', data.favicon); }
             if (data.mapaImg) { mapaImg = data.mapaImg; localStorage.setItem('mapaImg', data.mapaImg); }
+            if (data.qrCustom) { qrCustom = data.qrCustom; localStorage.setItem('qrCustom', data.qrCustom); }
             render();
         } catch (err) { render(); }
     }
@@ -597,9 +623,7 @@
 
     function borrarTodo() { if(confirm("PELIGRO: ¿Estás seguro de borrar TODO el menú?")) { localStorage.clear(); location.reload(); } }
 
-    // Renderiza lo local inmediatamente para velocidad
     render();
-    // E intenta sincronizar siempre en segundo plano (modo silencioso)
     cargarDesdeRepo(true);
 </script>
 </body>
