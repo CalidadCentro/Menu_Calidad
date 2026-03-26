@@ -112,18 +112,75 @@
         .modal-content { background: white; padding: 25px; border-radius: 20px; width: 100%; max-width: 450px; position: relative; max-height: 90vh; overflow-y: auto; }
         .social-tag { background: #f0f0f0; padding: 8px 12px; border-radius: 10px; display: flex; align-items: center; gap: 10px; font-size: 0.8rem; margin-bottom: 5px; border: 1px solid #ddd; }
 
+        /* =========================================================
+           ESTILOS PARA MENÚ CARTA PDF (FIJOS A LA DERECHA)
+           ======================================================== */
+        #print-carta-menu {
+            display: none; 
+            width: 210mm;
+            padding: 20mm 15mm; 
+            box-sizing: border-box;
+            background-color: #ffffff !important; 
+            color: #000000 !important; 
+            position: absolute;
+            top: 0; left: 0;
+            z-index: -1000;
+        }
+
+        .carta-header { text-align: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #000; }
+        .carta-header img { max-width: 150px; margin-bottom: 10px; } 
+        .carta-biz-name { font-family: var(--fuente-actual); font-weight: 700; color: #000 !important; font-size: 2.2rem; margin: 0; text-transform: uppercase; }
+
+        .carta-category-block { display: flex; flex-direction: row; gap: 30px; margin-bottom: 25px; align-items: flex-start; }
+
+        /* Espacio a la izquierda para imágenes manuales */
+        .carta-img-wrapper { width: 35%; min-height: 120px; display: block; }
+
+        /* Texto siempre a la derecha */
+        .carta-cat-info { flex: 1; display: flex; flex-direction: column; }
+        .carta-cat-title { font-family: var(--fuente-actual); font-weight: 700; color: #000 !important; font-size: 1.8rem; margin: 0 0 10px 0; text-align: left; border-bottom: 1px solid #ccc; text-transform: uppercase; break-after: avoid; page-break-after: avoid; }
+
+        .carta-item { margin-bottom: 12px; break-inside: avoid; page-break-inside: avoid; }
+        .carta-item-header { display: flex; justify-content: space-between; align-items: baseline; }
+        .carta-item-name { font-family: var(--fuente-actual); font-weight: 700; font-size: 1.1rem; color: #000 !important; text-transform: uppercase; } 
+        .carta-item-dots { flex: 1; border-bottom: 1px dotted #000; margin: 0 8px; position: relative; top: -4px; }
+        .carta-item-price { font-family: var(--fuente-actual); font-weight: 700; font-size: 1.1rem; color: #000 !important; }
+        
+        .carta-item-desc { font-family: var(--fuente-actual); font-size: 0.85rem; color: #333 !important; text-align: justify; line-height: 1.3; margin: 2px 0 0 0; }
+
+        /* Estilos Pie de Página PDF */
+        .carta-footer { 
+            margin-top: 30px; 
+            padding-top: 15px; 
+            border-top: 2px solid #000; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            page-break-inside: avoid;
+        }
+        .carta-footer-info { flex: 1; }
+        .carta-footer-info img { max-width: 120px; margin-bottom: 10px; display: block; }
+        .carta-footer-info p { margin: 2px 0; font-family: var(--fuente-actual); color: #000 !important; font-size: 0.95rem; }
+        .carta-footer-qrs { display: flex; gap: 20px; align-items: flex-end; }
+        .carta-qr-box { text-align: center; }
+        .carta-qr-box img { width: 85px; height: 85px; border: 1px solid #000; padding: 2px; background: white; }
+        .carta-qr-box span { display: block; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; margin-top: 3px; color: #000; }
+
         @media print {
             html, body { height: auto !important; min-height: auto !important; display: block !important; overflow: visible !important; }
-            #admin-panel, .nav-container, .top-controls, .admin-btns, #login-modal, #product-modal { display: none !important; }
-            header, main, footer { display: block !important; opacity: 1 !important; visibility: visible !important; }
-            .grid { display: block !important; }
-            .card { page-break-inside: avoid; display: flex !important; flex-direction: row !important; align-items: center; border: 1px solid #eee; margin-bottom: 10px; text-align: left; }
-            .card img { width: 120px !important; aspect-ratio: 1/1 !important; }
-            .card-body { padding: 10px; text-align: left !important; flex: 1; }
-            .category-section { page-break-inside: auto; }
-            .map-wrapper { display: block !important; height: 300px !important; visibility: visible !important; }
-            .qr-container { display: flex !important; }
-            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            #admin-panel, .nav-container, .top-controls, .admin-btns, #login-modal, #product-modal, #print-carta-menu { display: none !important; }
+            
+            body:has(#print-carta-active) > *:not(#print-carta-active) { display: none !important; }
+            body:has(#print-carta-active) #print-carta-active { 
+                display: block !important; 
+                visibility: visible !important; 
+                position: static !important; 
+                z-index: auto !important; 
+                background-color: #ffffff !important; 
+                padding: 10mm !important;
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important;
+            }
         }
     </style>
 </head>
@@ -167,6 +224,9 @@
         <h3>🏠 Identidad y Estilo</h3>
         <button onclick="window.print()" style="background:#dc3545; color:white; border:none; padding:12px; width:100%; border-radius:8px; font-weight:bold; cursor:pointer; margin-bottom:10px;">
             <i class="fas fa-file-pdf"></i> IMPRIMIR MENÚ COMPLETO (PDF)
+        </button>
+        <button onclick="imprimirMenuCarta()" style="background:#f39c12; color:white; border:none; padding:12px; width:100%; border-radius:8px; font-weight:bold; cursor:pointer; margin-bottom:20px;">
+            <i class="fas fa-file-pdf"></i> IMPRIMIR MENÚ CARTA PDF
         </button>
 
         <label>Nombre del Negocio:</label><input type="text" id="adm-titulo" oninput="actualizarConfig()">
@@ -279,6 +339,8 @@
     <div class="modal-content" id="modal-detail" style="text-align:center;"></div>
 </div>
 
+<div id="print-carta-menu"></div>
+
 <script>
     let categorias = JSON.parse(localStorage.getItem('cats')) || ["Entradas"];
     let productos = JSON.parse(localStorage.getItem('prods')) || [];
@@ -348,6 +410,16 @@
             sect.className = 'category-section'; sect.id = `section-${cat.replace(/\s+/g, '-').toLowerCase()}`;
             sect.innerHTML = `<h2 class="category-title">${cat}</h2>`;
 
+            // === AVISO AL INICIO DE PASTELERÍA ===
+            if (cat.toLowerCase() === 'pastelería' || cat.toLowerCase() === 'pasteleria') {
+                let avisoInicio = document.createElement('div');
+                avisoInicio.style.textAlign = 'center';
+                avisoInicio.style.width = '100%';
+                avisoInicio.style.marginBottom = '15px';
+                avisoInicio.innerHTML = '<strong>CONSULTAR DISPONIBILIDAD EN PASTELERIA*</strong>';
+                sect.appendChild(avisoInicio);
+            }
+
             let pDeCat = productos.map((p, i) => ({...p, realIdx: i})).filter(p => p.cat === cat);
             let grupos = {};
             pDeCat.forEach(p => { let sub = p.subcat || "_generales"; if(!grupos[sub]) grupos[sub] = []; grupos[sub].push(p); });
@@ -366,6 +438,7 @@
                 sect.appendChild(gridSub);
             }
             
+            // === AVISO AL FINAL DE PASTELERÍA ===
             if (cat.toLowerCase() === 'pastelería' || cat.toLowerCase() === 'pasteleria') {
                 let avisoMsg = document.createElement('div');
                 avisoMsg.style.textAlign = 'center';
@@ -586,6 +659,110 @@
     }
 
     function borrarTodo() { if(confirm("PELIGRO: ¿Estás seguro de borrar TODO el menú?")) { localStorage.clear(); location.reload(); } }
+
+    function imprimirMenuCarta() {
+        const printContainer = document.getElementById('print-carta-menu');
+        printContainer.innerHTML = ''; 
+
+        // Cabecera
+        let headerHTML = `
+            <div class="carta-header">
+                ${logoFooter ? `<img src="${logoFooter}">` : ''}
+                <h1 class="carta-biz-name">${config.titulo}</h1>
+            </div>`;
+        printContainer.innerHTML += headerHTML;
+
+        // Contenido de Categorías
+        categorias.forEach((cat) => {
+            let prodsInCat = productos.filter(p => p.cat === cat);
+            if (prodsInCat.length === 0) return;
+
+            // Agrupar por subcategorías igual que en el menú principal
+            let grupos = {};
+            prodsInCat.forEach(p => { 
+                let sub = p.subcat || "_generales"; 
+                if(!grupos[sub]) grupos[sub] = []; 
+                grupos[sub].push(p); 
+            });
+
+            let catBlockHTML = `
+                <div class="carta-category-block">
+                    <div class="carta-img-wrapper"></div>
+                    
+                    <div class="carta-cat-info">
+                        <h3 class="carta-cat-title">${cat}</h3>
+                        <div>
+            `;
+
+            // Productos sin subcategoría primero
+            if(grupos["_generales"]) {
+                grupos["_generales"].forEach(p => {
+                    catBlockHTML += `
+                        <div class="carta-item">
+                            <div class="carta-item-header">
+                                <span class="carta-item-name">${p.nom}</span>
+                                <span class="carta-item-dots"></span>
+                                <span class="carta-item-price">$${p.pre}</span>
+                            </div>
+                            ${p.desc ? `<p class="carta-item-desc">${p.desc}</p>` : ''}
+                        </div>
+                    `;
+                });
+            }
+
+            // Productos con subcategoría después
+            for(let sub in grupos) {
+                if(sub === "_generales") continue;
+                
+                catBlockHTML += `<h4 style="font-family: var(--fuente-actual); font-weight: 700; font-size: 1.15rem; color: #555; margin: 15px 0 8px 0; text-transform: uppercase; text-align: left; border-left: 3px solid #ccc; padding-left: 8px; page-break-after: avoid; break-after: avoid;">${sub}</h4>`;
+
+                grupos[sub].forEach(p => {
+                    catBlockHTML += `
+                        <div class="carta-item">
+                            <div class="carta-item-header">
+                                <span class="carta-item-name">${p.nom}</span>
+                                <span class="carta-item-dots"></span>
+                                <span class="carta-item-price">$${p.pre}</span>
+                            </div>
+                            ${p.desc ? `<p class="carta-item-desc">${p.desc}</p>` : ''}
+                        </div>
+                    `;
+                });
+            }
+
+            catBlockHTML += `</div></div></div>`;
+            printContainer.innerHTML += catBlockHTML;
+        });
+
+        // Pie de Página del PDF (Logo, Info y QRs)
+        let footerHTML = `
+            <div class="carta-footer">
+                <div class="carta-footer-info">
+                    ${logoFooter ? `<img src="${logoFooter}">` : ''}
+                    <p><strong>${config.dir || ''}</strong></p>
+                    <p>${config.telFijo || ''} ${config.telCel || ''}</p>
+                </div>
+                <div class="carta-footer-qrs">
+                    ${config.urlQR ? `
+                        <div class="carta-qr-box">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(config.urlQR)}">
+                            <span>Menú Digital</span>
+                        </div>` : ''}
+                    ${qrCustom ? `
+                        <div class="carta-qr-box">
+                            <img src="${qrCustom}">
+                            <span>Pago Deuna</span>
+                        </div>` : ''}
+                </div>
+            </div>`;
+        printContainer.innerHTML += footerHTML;
+
+        printContainer.id = 'print-carta-active';
+        setTimeout(() => {
+            window.print();
+            printContainer.id = 'print-carta-menu';
+        }, 150);
+    }
 
     render();
     cargarDesdeRepo(true);
