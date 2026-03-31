@@ -433,7 +433,13 @@
 
             for(let sub in grupos) {
                 if(sub === "_generales") continue;
-                sect.innerHTML += `<div class="subcat-title">${sub}</div>`;
+                
+                // CORRECCIÓN: Usamos createElement para que el título no borre los eventos de los productos previos
+                let subTitleDiv = document.createElement('div');
+                subTitleDiv.className = 'subcat-title';
+                subTitleDiv.innerText = sub;
+                sect.appendChild(subTitleDiv);
+
                 let gridSub = document.createElement('div'); gridSub.className = 'grid';
                 grupos[sub].forEach(p => gridSub.appendChild(crearCard(p, isAdmin)));
                 sect.appendChild(gridSub);
