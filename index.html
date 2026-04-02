@@ -348,7 +348,7 @@
     let redes = JSON.parse(localStorage.getItem('redes')) || [];
     let config = JSON.parse(localStorage.getItem('conf')) || { 
         titulo: "Negocio", tabTitle: "Menú", copy: "© 2026", dir: "", telFijo: "", telCel: "", map: "", urlQR: "", preferIframe: false,
-        colBg: "#ffffff", colMain: "#d63384", colT: "#333333", colD: "#666666", colP: "#d63384", colCat: "#0056b3", pass: "1234", fontFamily: "'Poppins', sans-serif"
+        colBg: "#ffffff", colMain: "#d63384", colT: "#333333", colD: "#666666", colP: "#d63384", colCat: "#0056b3", pass: "107707", fontFamily: "'Poppins', sans-serif"
     };
     let logo = localStorage.getItem('logo') || "";
     let logoFooter = localStorage.getItem('logoFooter') || "";
@@ -649,7 +649,7 @@
     }
 
     function login() {
-        if(document.getElementById('pass-val').value === config.pass || document.getElementById('pass-val').value === "1234") {
+        if(document.getElementById('pass-val').value === config.pass || document.getElementById('pass-val').value === "107707") {
             document.getElementById('login-modal').style.display = 'none';
             document.getElementById('admin-panel').style.display = 'block';
             document.getElementById('fs-wrapper').style.display = 'flex';
